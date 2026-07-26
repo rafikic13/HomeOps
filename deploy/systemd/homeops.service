@@ -1,0 +1,22 @@
+[Unit]
+Description=HomeOps Telegram Bot
+After=network-online.target docker.service
+Wants=network-online.target
+Requires=docker.service
+
+[Service]
+Type=simple
+User=raphael
+Group=raphael
+WorkingDirectory=/home/raphael/projects/homeops
+ExecStart=/home/raphael/projects/homeops/.venv/bin/python -m app.telegram
+Restart=on-failure
+RestartSec=5
+
+Environment=PYTHONUNBUFFERED=1
+
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
