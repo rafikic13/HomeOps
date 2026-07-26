@@ -6,10 +6,15 @@ Requires=docker.service
 
 [Service]
 Type=simple
-User=raphael
-Group=raphael
-WorkingDirectory=/home/raphael/projects/homeops
-ExecStart=/home/raphael/projects/homeops/.venv/bin/python -m app.telegram
+
+# Create a dedicated service account for production use.
+User=homeops
+Group=homeops
+
+# Generic installation path used for documentation.
+WorkingDirectory=/opt/homeops
+ExecStart=/opt/homeops/.venv/bin/python -m app.telegram
+
 Restart=on-failure
 RestartSec=5
 
