@@ -1,9 +1,14 @@
 import argparse
 
 from rich.console import Console
+from rich.panel import Panel
 from rich.table import Table
 
-from app.docker import get_container_statuses, restart_container
+from app.docker import (
+    get_container_logs,
+    get_container_statuses,
+    restart_container,
+)
 from app.prometheus import get_target_statuses
 
 
@@ -47,8 +52,31 @@ def show_container_status() -> None:
 def restart_service(container_name: str) -> None:
     try:
         result = restart_container(container_name)
+
         console.print(
             f"[bold green]{result['message']}[/bold green]"
+        )
+
+    except (ValueError, RuntimeError) as error:
+        console.print(f"[bold red]{error}[/bold red]")
+
+
+def show_container_logs(
+    container_name: str,
+    tail: int,
+) -> None:
+    try:
+        logs = get_container_logs(
+            container_name,
+            tail=tail,
+        )
+
+        console.print(
+            Panel(
+                logs or "No logs returned.",
+                title=f"{container_name} logs",
+                expand=False,
+            )
         )
 
     except (ValueError, RuntimeError) as error:
@@ -86,6 +114,23 @@ def build_parser() -> argparse.ArgumentParser:
         help="Name of the approved container to restart.",
     )
 
+    logs_parser = subparsers.add_parser(
+        "logs",
+        help="Show recent logs for an approved container.",
+    )
+
+    logs_parser.add_argument(
+        "container",
+        help="Name of the approved container.",
+    )
+
+    logs_parser.add_argument(
+        "--tail",
+        type=int,
+        default=50,
+        help="Number of recent log lines to show, from 1 to 200.",
+    )
+
     return parser
 
 
@@ -101,6 +146,12 @@ def main() -> None:
 
     elif args.command == "restart":
         restart_service(args.container)
+
+    elif args.command == "logs":
+        show_container_logs(
+            args.container,
+            args.tail,
+        )
 
 
 if __name__ == "__main__":

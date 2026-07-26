@@ -12,6 +12,16 @@ ALLOWED_RESTART_CONTAINERS = {
     "flaresolverr",
 }
 
+ALLOWED_LOG_CONTAINERS = {
+    "jellyfin",
+    "sonarr",
+    "radarr",
+    "prowlarr",
+    "qbittorrent",
+    "jellyseerr",
+    "flaresolverr",
+}
+
 
 def get_docker_client():
     """
@@ -63,9 +73,6 @@ def get_container_statuses() -> list[dict]:
 def restart_container(container_name: str) -> dict:
     """
     Restart an approved Docker container.
-
-    Containers not included in ALLOWED_RESTART_CONTAINERS
-    are rejected.
     """
 
     normalized_name = container_name.strip().lower()
@@ -99,4 +106,53 @@ def restart_container(container_name: str) -> dict:
     except DockerException as error:
         raise RuntimeError(
             f"Could not restart '{normalized_name}': {error}"
+        ) from error
+
+
+def get_container_logs(
+    container_name: str,
+    tail: int = 50,
+) -> str:
+    """
+    Return a limited number of recent log lines from an approved container.
+    """
+
+    normalized_name = container_name.strip().lower()
+
+    if normalized_name not in ALLOWED_LOG_CONTAINERS:
+        allowed = ", ".join(sorted(ALLOWED_LOG_CONTAINERS))
+
+        raise ValueError(
+            f"Log access denied for '{normalized_name}'. "
+            f"Approved containers: {allowed}"
+        )
+
+    if tail < 1 or tail > 200:
+        raise ValueError(
+            "The number of log lines must be between 1 and 200."
+        )
+
+    client = get_docker_client()
+
+    try:
+        container = client.containers.get(normalized_name)
+
+        logs = container.logs(
+            tail=tail,
+            timestamps=True,
+        )
+
+        return logs.decode(
+            "utf-8",
+            errors="replace",
+        )
+
+    except NotFound as error:
+        raise RuntimeError(
+            f"Container '{normalized_name}' was not found"
+        ) from error
+
+    except DockerException as error:
+        raise RuntimeError(
+            f"Could not retrieve logs for '{normalized_name}': {error}"
         ) from error
