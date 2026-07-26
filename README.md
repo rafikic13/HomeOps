@@ -1,39 +1,36 @@
 # HomeOps
+# Home Server Lab
 
-HomeOps is a Python-based homelab control plane for monitoring infrastructure and managing approved services.
+A complete homelab built around pfSense, Ubuntu Server, Docker, monitoring, security, remote access, and custom Python automation.
 
-The project integrates with Prometheus and Docker to provide infrastructure status, container visibility, and operational controls through a terminal interface and, later, a Telegram bot.
+## Project Overview
 
-## Current Features
+This project combines network infrastructure, firewalling, self-hosted services, monitoring, alerting, and custom automation into one integrated home server environment.
 
-- Prometheus API integration
-- Infrastructure target status checks
-- Structured terminal output using Rich
-- Environment-based configuration
-- Git-based development workflow
+The main components are:
 
-## Planned Features
+- pfSense firewall and router
+- Managed network switch
+- Wireless access point
+- Ubuntu Server
+- Docker-based services
+- Prometheus and Grafana monitoring
+- Uptime Kuma alerts
+- Suricata intrusion detection
+- Tailscale remote access
+- HomeOps Python control plane
 
-- Docker container status
-- Approved container restart commands
-- Recent container log retrieval
-- Telegram command interface
-- CPU and memory summaries
-- Backup status checks
-- Security status reporting
-- Action logging
-- Automated tests
-
-## Architecture
+## High-Level Topology
 
 ```text
-Terminal / Telegram
-        |
-        v
-     HomeOps
-        |
-   +----+----+
-   |         |
-Prometheus  Docker
-   |         |
-Metrics   Containers
+Internet
+   |
+ISP Modem
+   |
+pfSense Firewall
+   |
+Managed Switch
+   |
+   +-- Ubuntu Server
+   +-- Wireless Access Point
+   +-- Other LAN Devices
